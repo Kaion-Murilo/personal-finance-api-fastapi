@@ -1,0 +1,49 @@
+% extends "base.html" %}
+
+{% block titulo %}Início - {{ super() }}{% endblock %}
+
+{% block conteudo %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="jumbotron bg-primary text-white p-5 rounded">
+            <h1 class="display-4">🚀 Personal Finance API 🚀</h1>
+            <p class="lead">
+                
+            </p>
+            <hr class="my-4 bg-white">
+            <p>Explore as funcionalidades do sistema através do menu acima.</p>
+            <p class="mb-0">
+                <strong>Versão: </strong> {{ versao }}
+            </p>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-body text-center">
+                <h2>👥</h2>
+                <h5 class="card-title">Gerenciar Clientes</h5>
+                <p class="card-text">
+                    Cadastre, visualize e gerencie clientes do sistema.
+                </p>
+                <a href="/clientes" class="btn btn-primary">Acessar</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-body text-center">
+                <h2>📚</h2>
+                <h5 class="card-title">Documentação</h5>
+                <p class="card-text">
+                    Acesse a documentação interativa da API.
+                </p>
+                <a href="/docs" class="btn btn-primary" target="_blank">Acessar</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

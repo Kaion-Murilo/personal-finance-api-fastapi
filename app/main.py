@@ -8,6 +8,14 @@ app = FastAPI(
     description="REST API for personal finance management built with FastAPI, featuring JWT authentication, PostgreSQL, and monthly financial reports.",
     version="1.0.0",
 )
-@app.get("/", response_class=HTMLResponse)
-async def front_page(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request, "titulo": "Techlog Solutions CRM", "versao": "1.0.0"})
+@app.get("/health")
+async def health_check():
+    return {"status": "OK"}
+
+@app.get("/")
+def home(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="index.html",
+        context={}
+    )
