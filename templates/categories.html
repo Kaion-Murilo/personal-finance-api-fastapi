@@ -1,0 +1,146 @@
+{% extends "base.html" %} {% block titulo %}Categorias{% endblock %} {% block conteudo %}
+<div class="row">
+
+  <!-- Formulário criar -->
+  <div class="col-md-4">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h5 class="card-title">➕ Nova Categoria</h5>
+        <form method="post" action="/category/criar">
+          <div class="mb-3">
+            <label class="form-label">Nome</label>
+            <input type="text" name="name" class="form-control" required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Descrição</label>
+            <input type="text" name="description" class="form-control" />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Tipo</label>
+            <select name="type" class="form-select" required>
+              <option value="income">💰 Receita</option>
+              <option value="expense">💸 Despesa</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Criar</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabela -->
+  <div class="col-md-8">
+    <h2>🗂️ Categorias</h2>
+    <table class="table table-striped mt-3">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nome</th>
+          <th>Descrição</th>
+          <th>Tipo</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for cat in categorias %}
+        <tr>
+          <td>{{ cat.id }}</td>
+          <td>
+            <a href="#"
+              class="text-decoration-none"
+              data-id="{{ cat.id }}"
+              data-name="{{ cat.name }}"
+              data-description="{{ cat.description }}"
+              data-type="{{ cat.type }}"
+              onclick="abrirEdicao(this)">
+              {{ cat.name }}
+            </a>
+          </td>
+          <td>{{ cat.description }}</td>
+          <td>
+            {% if cat.type == "income" %}
+              <span class="badge bg-success">💰 Receita</span>
+            {% else %}
+              <span class="badge bg-danger">💸 Despesa</span>
+            {% endif %}
+          </td>
+          <td>
+            <button
+              type="button"
+              class="btn btn-sm btn-danger"
+              data-id="{{ cat.id }}"
+              data-nome="{{ cat.name }}"
+              onclick="confirmarDelete(this)">
+              🗑️
+            </button>
+            <form
+              id="delete-form-{{ cat.id }}"
+              method="post"
+              action="/category/deletar/{{ cat.id }}"
+              style="display:none">
+            </form>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="5" class="text-center">Nenhuma categoria cadastrada.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal edição -->
+<div class="modal fade" id="modalEdicao" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">✏️ Editar Categoria</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form id="form-edicao" method="post">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Nome</label>
+            <input type="text" name="name" id="edit-name" class="form-control" required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Descrição</label>
+            <input type="text" name="description" id="edit-description" class="form-control" />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Tipo</label>
+            <select name="type" id="edit-type" class="form-select" required>
+              <option value="income">💰 Receita</option>
+              <option value="expense">💸 Despesa</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  function abrirEdicao(el) {
+    document.getElementById('edit-name').value = el.dataset.name;
+    document.getElementById('edit-description').value = el.dataset.description || '';
+    document.getElementById('edit-type').value = el.dataset.type;
+    document.getElementById('form-edicao').action = '/category/editar/' + el.dataset.id;
+    new bootstrap.Modal(document.getElementById('modalEdicao')).show();
+  }
+
+  function confirmarDelete(btn) {
+    const id = btn.dataset.id;
+    const nome = btn.dataset.nome;
+    if (confirm(`Deseja excluir a categoria "${nome}"?`)) {
+      document.getElementById('delete-form-' + id).submit();
+    }
+  }
+</script>
+{% endblock %}

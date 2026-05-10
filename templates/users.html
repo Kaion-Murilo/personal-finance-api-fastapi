@@ -1,0 +1,75 @@
+{% extends "base.html" %} {% block titulo %}Meu Perfil{% endblock %} {% block
+conteudo %}
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="card shadow-sm">
+      <div class="card-body p-4">
+        <h4 class="card-title mb-4">👤 Meu Perfil</h4>
+
+        <form method="post" action="/user/editar">
+          <div class="mb-3">
+            <label class="form-label">Nome</label>
+            <input
+              type="text"
+              name="nome"
+              class="form-control"
+              value="{{ current_user.nome }}"
+              required
+            />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input
+              type="email"
+              name="email"
+              class="form-control"
+              value="{{ current_user.email }}"
+              required
+            />
+          </div>
+          <div class="mb-3">
+            <label class="form-label"
+              >Nova Senha
+              <span class="text-muted"
+                >(deixe em branco para não alterar)</span
+              ></label
+            >
+            <input type="password" name="password_hash" class="form-control" />
+          </div>
+          <button type="submit" class="btn btn-primary w-100">
+            💾 Salvar Alterações
+          </button>
+        </form>
+
+        <hr class="my-4" />
+
+        <button
+          type="button"
+          class="btn btn-danger w-100"
+          onclick="confirmarExclusao()"
+        >
+          🗑️ Excluir Minha Conta
+        </button>
+        <form
+          id="delete-form"
+          method="post"
+          action="/user/deletar"
+          style="display: none"
+        ></form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function confirmarExclusao() {
+    if (
+      confirm(
+        `Deseja excluir sua conta permanentemente? Esta ação não pode ser desfeita.`,
+      )
+    ) {
+      document.getElementById("delete-form").submit();
+    }
+  }
+</script>
+{% endblock %}

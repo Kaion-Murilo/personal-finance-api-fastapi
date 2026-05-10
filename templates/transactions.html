@@ -1,0 +1,160 @@
+{% extends "base.html" %} {% block titulo %}Transações{% endblock %} {% block conteudo %}
+<div class="row">
+
+  <!-- Formulário criar -->
+  <div class="col-md-4">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h5 class="card-title">➕ Nova Transação</h5>
+        <form method="post" action="/transaction/criar">
+          <div class="mb-3">
+            <label class="form-label">Título</label>
+            <input type="text" name="title" class="form-control" required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Valor</label>
+            <input type="number" name="amount" step="0.01" class="form-control" required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Data</label>
+            <input type="date" name="date" class="form-control" required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Categoria</label>
+            <select name="category_id" class="form-select" required>
+              {% for cat in categorias %}
+              <option value="{{ cat.id }}">
+                {{ cat.name }} —
+                {% if cat.type == "income" %}💰{% else %}💸{% endif %}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Criar</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabela -->
+  <div class="col-md-8">
+    <h2>💸 Transações</h2>
+    <table class="table table-striped mt-3">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Título</th>
+          <th>Valor</th>
+          <th>Data</th>
+          <th>Categoria</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in transacoes %}
+        <tr>
+          <td>{{ t.id }}</td>
+          <td>
+            <a href="#"
+              class="text-decoration-none"
+              data-id="{{ t.id }}"
+              data-title="{{ t.title }}"
+              data-amount="{{ t.amount }}"
+              data-date="{{ t.date }}"
+              data-categoryid="{{ t.category_id }}"
+              onclick="abrirEdicao(this)">
+              {{ t.title }}
+            </a>
+          </td>
+          <td>R$ {{ "%.2f"|format(t.amount|float) }}</td>
+          <td>{{ t.date }}</td>
+          <td>{{ t.category_id }}</td>
+          <td>
+            <button
+              type="button"
+              class="btn btn-sm btn-danger"
+              data-id="{{ t.id }}"
+              data-nome="{{ t.title }}"
+              onclick="confirmarDelete(this)">
+              🗑️
+            </button>
+            <form
+              id="delete-form-{{ t.id }}"
+              method="post"
+              action="/transaction/deletar/{{ t.id }}"
+              style="display:none">
+            </form>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="6" class="text-center">Nenhuma transação cadastrada.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal edição -->
+<div class="modal fade" id="modalEdicao" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">✏️ Editar Transação</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form id="form-edicao" method="post">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Título</label>
+            <input type="text" name="title" id="edit-title" class="form-control" required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Valor</label>
+            <input type="number" name="amount" id="edit-amount" step="0.01" class="form-control" required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Data</label>
+            <input type="date" name="date" id="edit-date" class="form-control" required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Categoria</label>
+            <select name="category_id" id="edit-categoryid" class="form-select" required>
+              {% for cat in categorias %}
+              <option value="{{ cat.id }}">
+                {{ cat.name }} —
+                {% if cat.type == "income" %}💰{% else %}💸{% endif %}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  function abrirEdicao(el) {
+    document.getElementById('edit-title').value = el.dataset.title;
+    document.getElementById('edit-amount').value = el.dataset.amount;
+    document.getElementById('edit-date').value = el.dataset.date;
+    document.getElementById('edit-categoryid').value = el.dataset.categoryid;
+    document.getElementById('form-edicao').action = '/transaction/editar/' + el.dataset.id;
+    new bootstrap.Modal(document.getElementById('modalEdicao')).show();
+  }
+
+  function confirmarDelete(btn) {
+    const id = btn.dataset.id;
+    const nome = btn.dataset.nome;
+    if (confirm(`Deseja excluir a transação "${nome}"?`)) {
+      document.getElementById('delete-form-' + id).submit();
+    }
+  }
+</script>
+{% endblock %}
