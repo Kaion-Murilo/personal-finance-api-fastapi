@@ -13,6 +13,8 @@ class transaction(BaseModel):
     category_id : int
 
     created_at: str
+from sqlalchemy.orm import relationship
+
 class Transaction(Base):
     __tablename__ = "transactions"
 
@@ -20,8 +22,8 @@ class Transaction(Base):
     title = Column(String, nullable=False)
     amount = Column(Numeric, nullable=False)
     date = Column(Date, nullable=False)
-
     user_id = Column(Integer, ForeignKey("users.id"))
     category_id = Column(Integer, ForeignKey("categories.id"))
-
     created_at = Column(DateTime, default=datetime.utcnow)
+
+    category = relationship("Category")  # ← adiciona isso

@@ -1,6 +1,6 @@
-{% extends "base.html" %} {% block titulo %}Transações{% endblock %} {% block conteudo %}
+{% extends "base.html" %} {% block titulo %}Transações{% endblock %} {% block
+conteudo %}
 <div class="row">
-
   <!-- Formulário criar -->
   <div class="col-md-4">
     <div class="card shadow-sm">
@@ -13,7 +13,13 @@
           </div>
           <div class="mb-3">
             <label class="form-label">Valor</label>
-            <input type="number" name="amount" step="0.01" class="form-control" required />
+            <input
+              type="number"
+              name="amount"
+              step="0.01"
+              class="form-control"
+              required
+            />
           </div>
           <div class="mb-3">
             <label class="form-label">Data</label>
@@ -24,8 +30,8 @@
             <select name="category_id" class="form-select" required>
               {% for cat in categorias %}
               <option value="{{ cat.id }}">
-                {{ cat.name }} —
-                {% if cat.type == "income" %}💰{% else %}💸{% endif %}
+                {{ cat.name }} — {% if cat.type == "income" %}💰{% else %}💸{%
+                endif %}
               </option>
               {% endfor %}
             </select>
@@ -38,6 +44,41 @@
 
   <!-- Tabela -->
   <div class="col-md-8">
+    <form method="get" action="/transaction" class="row g-2 mb-3">
+      <div class="col-md-3">
+        <label class="form-label">De</label>
+        <input
+          type="date"
+          name="data_inicio"
+          class="form-control"
+          value="{{ data_inicio or '' }}"
+        />
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Até</label>
+        <input
+          type="date"
+          name="data_fim"
+          class="form-control"
+          value="{{ data_fim or '' }}"
+        />
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Categoria</label>
+        <select name="category_id" class="form-select">
+          <option value="">Todas</option>
+          {% for cat in categorias %}
+<option value="{{ cat.id }}" {% if category_id_filtro and category_id_filtro|int == cat.id %}selected{% endif %}>
+            {{ cat.name }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2 d-flex align-items-end gap-1">
+        <button type="submit" class="btn btn-primary w-100">🔍</button>
+        <a href="/transaction" class="btn btn-secondary w-100">✖</a>
+      </div>
+    </form>
     <h2>💸 Transações</h2>
     <table class="table table-striped mt-3">
       <thead>
@@ -55,14 +96,16 @@
         <tr>
           <td>{{ t.id }}</td>
           <td>
-            <a href="#"
+            <a
+              href="#"
               class="text-decoration-none"
               data-id="{{ t.id }}"
               data-title="{{ t.title }}"
               data-amount="{{ t.amount }}"
               data-date="{{ t.date }}"
               data-categoryid="{{ t.category_id }}"
-              onclick="abrirEdicao(this)">
+              onclick="abrirEdicao(this)"
+            >
               {{ t.title }}
             </a>
           </td>
@@ -75,15 +118,16 @@
               class="btn btn-sm btn-danger"
               data-id="{{ t.id }}"
               data-nome="{{ t.title }}"
-              onclick="confirmarDelete(this)">
+              onclick="confirmarDelete(this)"
+            >
               🗑️
             </button>
             <form
               id="delete-form-{{ t.id }}"
               method="post"
               action="/transaction/deletar/{{ t.id }}"
-              style="display:none">
-            </form>
+              style="display: none"
+            ></form>
           </td>
         </tr>
         {% else %}
@@ -102,36 +146,70 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">✏️ Editar Transação</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+        ></button>
       </div>
       <form id="form-edicao" method="post">
         <div class="modal-body">
           <div class="mb-3">
             <label class="form-label">Título</label>
-            <input type="text" name="title" id="edit-title" class="form-control" required />
+            <input
+              type="text"
+              name="title"
+              id="edit-title"
+              class="form-control"
+              required
+            />
           </div>
           <div class="mb-3">
             <label class="form-label">Valor</label>
-            <input type="number" name="amount" id="edit-amount" step="0.01" class="form-control" required />
+            <input
+              type="number"
+              name="amount"
+              id="edit-amount"
+              step="0.01"
+              class="form-control"
+              required
+            />
           </div>
           <div class="mb-3">
             <label class="form-label">Data</label>
-            <input type="date" name="date" id="edit-date" class="form-control" required />
+            <input
+              type="date"
+              name="date"
+              id="edit-date"
+              class="form-control"
+              required
+            />
           </div>
           <div class="mb-3">
             <label class="form-label">Categoria</label>
-            <select name="category_id" id="edit-categoryid" class="form-select" required>
+            <select
+              name="category_id"
+              id="edit-categoryid"
+              class="form-select"
+              required
+            >
               {% for cat in categorias %}
               <option value="{{ cat.id }}">
-                {{ cat.name }} —
-                {% if cat.type == "income" %}💰{% else %}💸{% endif %}
+                {{ cat.name }} — {% if cat.type == "income" %}💰{% else %}💸{%
+                endif %}
               </option>
               {% endfor %}
             </select>
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Cancelar
+          </button>
           <button type="submit" class="btn btn-primary">Salvar</button>
         </div>
       </form>
@@ -141,19 +219,20 @@
 
 <script>
   function abrirEdicao(el) {
-    document.getElementById('edit-title').value = el.dataset.title;
-    document.getElementById('edit-amount').value = el.dataset.amount;
-    document.getElementById('edit-date').value = el.dataset.date;
-    document.getElementById('edit-categoryid').value = el.dataset.categoryid;
-    document.getElementById('form-edicao').action = '/transaction/editar/' + el.dataset.id;
-    new bootstrap.Modal(document.getElementById('modalEdicao')).show();
+    document.getElementById("edit-title").value = el.dataset.title;
+    document.getElementById("edit-amount").value = el.dataset.amount;
+    document.getElementById("edit-date").value = el.dataset.date;
+    document.getElementById("edit-categoryid").value = el.dataset.categoryid;
+    document.getElementById("form-edicao").action =
+      "/transaction/editar/" + el.dataset.id;
+    new bootstrap.Modal(document.getElementById("modalEdicao")).show();
   }
 
   function confirmarDelete(btn) {
     const id = btn.dataset.id;
     const nome = btn.dataset.nome;
     if (confirm(`Deseja excluir a transação "${nome}"?`)) {
-      document.getElementById('delete-form-' + id).submit();
+      document.getElementById("delete-form-" + id).submit();
     }
   }
 </script>

@@ -5,11 +5,25 @@ from sqlalchemy.orm import Session
 from pathlib import Path
 from app.auth.auth import verificar_senha, criar_token, get_db
 from app.models.user import UserTable
-
+from fastapi.security import OAuth2PasswordRequestForm
+from fastapi import APIRouter, Depends, Form, Request, HTTPException, status
 router = APIRouter(prefix="/auth", tags=["Auth"])
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 templates = Jinja2Templates(directory=BASE_DIR / "templates")
 
+@router.post("/token")
+def login_api(
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    db: Session = Depends(get_db)
+):
+    usuario = db.query(UserTable).filter(UserTable.email == form_data.username).first()
+    if not usuario or not verificar_senha(form_data.password, usuario.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Credenciais inválidas"
+        )
+    token = criar_token(usuario.id, usuario.email)
+    return {"access_token": token, "token_type": "bearer"}
 @router.get("/login")
 def tela_login(request: Request):
     if request.cookies.get("access_token"):

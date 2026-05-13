@@ -7,7 +7,8 @@ from sqlalchemy.orm import Session
 from app.banco_de_dados.database import SessionLocal
 from app.models.user import UserTable
 
-SECRET_KEY = "troca_por_uma_chave_forte_aqui"
+import os
+SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 

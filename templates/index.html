@@ -1,68 +1,79 @@
-{% extends "base.html" %} {% block titulo %}Início - {{ super() }}{% endblock %}
-{% block conteudo %}
-<div class="row">
-  <div class="col-md-12">
-    <div class="jumbotron bg-primary text-white p-5 rounded">
-      <h1 class="display-4">🚀 Personal Finance API 🚀</h1>
-      <p class="lead"></p>
-      <hr class="my-4 bg-white" />
-      <p>Explore as funcionalidades do sistema através do menu acima.</p>
-      <p class="mb-0"><strong>Versão: </strong> {{ versao }}</p>
+{% extends "base.html" %} {% block titulo %}Dashboard{% endblock %} {% block conteudo %}
+
+<!-- Cards de resumo -->
+<div class="row mb-4">
+  <div class="col-md-3">
+    <div class="card shadow-sm border-0 bg-success text-white">
+      <div class="card-body">
+        <h6 class="card-title">💰 Total Receitas</h6>
+        <h3>R$ {{ "%.2f"|format(resumo.total_receitas) }}</h3>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card shadow-sm border-0 bg-danger text-white">
+      <div class="card-body">
+        <h6 class="card-title">💸 Total Despesas</h6>
+        <h3>R$ {{ "%.2f"|format(resumo.total_despesas) }}</h3>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card shadow-sm border-0 {% if resumo.saldo >= 0 %}bg-primary{% else %}bg-warning{% endif %} text-white">
+      <div class="card-body">
+        <h6 class="card-title">📊 Saldo</h6>
+        <h3>R$ {{ "%.2f"|format(resumo.saldo) }}</h3>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card shadow-sm border-0 bg-secondary text-white">
+      <div class="card-body">
+        <h6 class="card-title">🔢 Transações</h6>
+        <h3>{{ resumo.total_transacoes }}</h3>
+      </div>
     </div>
   </div>
 </div>
 
-<div class="row mt-5">
-  <div class="col-md-4">
-    <div class="card shadow-sm">
-      <div class="card-body text-center">
-        <h2>👥</h2>
-        <h5 class="card-title">Gerenciar Usuários</h5>
-        <p class="card-text">
-          Cadastre, visualize e gerencie usuários do sistema.
-        </p>
-        <a href="/user" class="btn btn-primary">Acessar</a>
-      </div>
+<!-- Últimas transações -->
+<div class="card shadow-sm">
+  <div class="card-body">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="mb-0">🕐 Últimas Transações</h5>
+      <a href="/transaction" class="btn btn-sm btn-outline-primary">Ver todas</a>
     </div>
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Título</th>
+          <th>Valor</th>
+          <th>Data</th>
+          <th>Categoria</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in ultimas %}
+        <tr>
+          <td>{{ t.title }}</td>
+          <td>R$ {{ "%.2f"|format(t.amount|float) }}</td>
+          <td>{{ t.date }}</td>
+          <td>
+            {% if t.category.type == "income" %}
+              <span class="badge bg-success">💰 {{ t.category.name }}</span>
+            {% else %}
+              <span class="badge bg-danger">💸 {{ t.category.name }}</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="4" class="text-center">Nenhuma transação ainda.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
-  <div class="row mt-5">
-    <div class="col-md-4">
-      <div class="card shadow-sm">
-        <div class="card-body text-center">
-          <h2>�</h2>
-          <h5 class="card-title">Gerenciar Categorias</h5>
-          <p class="card-text">
-            Cadastre, visualize e gerencie categorias de transações.
-          </p>
-          <a href="/category" class="btn btn-primary">Acessar</a>
-        </div>
-      </div>
-    </div>
-    </div>
-    <div class="row mt-5">
-      <div class="col-md-4">
-        <div class="card shadow-sm">
-          <div class="card-body text-center">
-            <h2>🔄</h2>
-            <h5 class="card-title">Gerenciar Transações</h5>
-            <p class="card-text">
-              Cadastre, visualize e gerencie transações financeiras.
-            </p>
-            <a href="/transaction" class="btn btn-primary">Acessar</a>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-4">
-        <div class="card shadow-sm">
-          <div class="card-body text-center">
-            <h2>📚</h2>
-            <h5 class="card-title">Documentação</h5>
-            <p class="card-text">Acesse a documentação interativa da API.</p>
-            <a href="/docs" class="btn btn-primary" target="_blank">Acessar</a>
-          </div>
-        </div>
-      </div>
-    </div>
 </div>
 
-    {% endblock %}
+{% endblock %}
