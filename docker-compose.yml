@@ -1,4 +1,5 @@
 services:
+
   db:
     image: postgres:16
     container_name: finance_db
@@ -7,10 +8,14 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: personal_finance
     ports:
+      # expõe a porta localmente para conexão via pgAdmin ou psql
       - "5432:5432"
     volumes:
+      # volume nomeado garante persistência dos dados entre restarts
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
+      # pg_isready verifica se o PostgreSQL está aceitando conexões
+      # a API só sobe depois que esse check passar — evita erro de conexão no startup
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
       timeout: 5s
@@ -23,11 +28,17 @@ services:
       - "8000:8000"
     depends_on:
       db:
+        # service_healthy espera o healthcheck passar — mais seguro que apenas "started"
         condition: service_healthy
     env_file:
+      # variáveis do .env são injetadas no container — DATABASE_URL aponta para "db"
+      # que é o hostname interno do Docker, não "localhost"
       - .env
     volumes:
+      # monta o código local dentro do container — permite hot reload sem rebuild
       - .:/app
 
 volumes:
+  # volume gerenciado pelo Docker — persiste mesmo com docker-compose down
+  # use docker-compose down -v para apagar os dados do banco junto
   postgres_data:

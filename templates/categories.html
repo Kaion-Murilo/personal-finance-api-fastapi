@@ -1,40 +1,86 @@
-{% extends "base.html" %} {% block titulo %}Categorias{% endblock %} {% block conteudo %}
-<div class="row">
+{% extends "base.html" %} {% block titulo %}Categorias{% endblock %} {% block
+conteudo %}
 
-  <!-- Formulário criar -->
+<div class="page-header d-flex justify-content-between align-items-center">
+  <div>
+    <h2>Categorias</h2>
+    <p>Gerencie suas categorias de receitas e despesas</p>
+  </div>
+  <button
+    class="btn btn-primary"
+    data-bs-toggle="modal"
+    data-bs-target="#modalCriar"
+  >
+    <i class="bi bi-plus-lg me-1"></i> Nova Categoria
+  </button>
+</div>
+
+<!-- Cards de resumo -->
+<div class="row g-3 mb-4">
   <div class="col-md-4">
-    <div class="card shadow-sm">
-      <div class="card-body">
-        <h5 class="card-title">➕ Nova Categoria</h5>
-        <form method="post" action="/category/criar">
-          <div class="mb-3">
-            <label class="form-label">Nome</label>
-            <input type="text" name="name" class="form-control" required />
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Descrição</label>
-            <input type="text" name="description" class="form-control" />
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Tipo</label>
-            <select name="type" class="form-select" required>
-              <option value="income">💰 Receita</option>
-              <option value="expense">💸 Despesa</option>
-            </select>
-          </div>
-          <button type="submit" class="btn btn-primary w-100">Criar</button>
-        </form>
+    <div class="card p-3">
+      <div
+        style="
+          font-size: 0.75rem;
+          color: #9ca3af;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+        "
+      >
+        Total
+      </div>
+      <div style="font-size: 1.8rem; font-weight: 700; color: #111827">
+        {{ categorias|length }}
+      </div>
+      <div style="font-size: 0.8rem; color: #9ca3af">
+        categorias cadastradas
       </div>
     </div>
   </div>
+  <div class="col-md-4">
+    <div class="card p-3">
+      <div
+        style="
+          font-size: 0.75rem;
+          color: #9ca3af;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+        "
+      >
+        Receitas
+      </div>
+      <div style="font-size: 1.8rem; font-weight: 700; color: #10b981">
+        {{ categorias|selectattr('type','eq','income')|list|length }}
+      </div>
+      <div style="font-size: 0.8rem; color: #9ca3af">categorias de entrada</div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card p-3">
+      <div
+        style="
+          font-size: 0.75rem;
+          color: #9ca3af;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+        "
+      >
+        Despesas
+      </div>
+      <div style="font-size: 1.8rem; font-weight: 700; color: #f43f5e">
+        {{ categorias|selectattr('type','eq','expense')|list|length }}
+      </div>
+      <div style="font-size: 0.8rem; color: #9ca3af">categorias de saída</div>
+    </div>
+  </div>
+</div>
 
-  <!-- Tabela -->
-  <div class="col-md-8">
-    <h2>🗂️ Categorias</h2>
-    <table class="table table-striped mt-3">
+<!-- Tabela de categorias -->
+<div class="card">
+  <div class="card-body p-0">
+    <table class="table mb-0">
       <thead>
         <tr>
-          <th>ID</th>
           <th>Nome</th>
           <th>Descrição</th>
           <th>Tipo</th>
@@ -44,46 +90,66 @@
       <tbody>
         {% for cat in categorias %}
         <tr>
-          <td>{{ cat.id }}</td>
           <td>
-            <a href="#"
+            <a
+              href="#"
               class="text-decoration-none"
+              style="color: #111827; font-weight: 500"
               data-id="{{ cat.id }}"
               data-name="{{ cat.name }}"
               data-description="{{ cat.description }}"
               data-type="{{ cat.type }}"
-              onclick="abrirEdicao(this)">
+              onclick="abrirEdicao(this)"
+            >
               {{ cat.name }}
             </a>
           </td>
-          <td>{{ cat.description }}</td>
+          <td style="color: #9ca3af">{{ cat.description or '—' }}</td>
           <td>
             {% if cat.type == "income" %}
-              <span class="badge bg-success">💰 Receita</span>
+            <span
+              class="badge"
+              style="background: #d1fae5; color: #065f46; padding: 5px 10px"
+            >
+              <i class="bi bi-arrow-down-circle me-1"></i> Receita
+            </span>
             {% else %}
-              <span class="badge bg-danger">💸 Despesa</span>
+            <span
+              class="badge"
+              style="background: #ffe4e6; color: #9f1239; padding: 5px 10px"
+            >
+              <i class="bi bi-arrow-up-circle me-1"></i> Despesa
+            </span>
             {% endif %}
           </td>
-          <td>
+          <td class="text-end">
             <button
               type="button"
-              class="btn btn-sm btn-danger"
+              class="btn btn-sm"
+              style="color: #9ca3af; border: none; background: none"
               data-id="{{ cat.id }}"
               data-nome="{{ cat.name }}"
-              onclick="confirmarDelete(this)">
-              🗑️
+              onclick="confirmarDelete(this)"
+            >
+              <i class="bi bi-trash"></i>
             </button>
             <form
               id="delete-form-{{ cat.id }}"
               method="post"
               action="/category/deletar/{{ cat.id }}"
-              style="display:none">
-            </form>
+              style="display: none"
+            ></form>
           </td>
         </tr>
         {% else %}
         <tr>
-          <td colspan="5" class="text-center">Nenhuma categoria cadastrada.</td>
+          <td colspan="4" class="text-center py-5" style="color: #9ca3af">
+            <i
+              class="bi bi-tag"
+              style="font-size: 2rem; display: block; margin-bottom: 0.5rem"
+            ></i>
+            Nenhuma categoria cadastrada ainda.
+          </td>
         </tr>
         {% endfor %}
       </tbody>
@@ -91,34 +157,111 @@
   </div>
 </div>
 
-<!-- Modal edição -->
+<!-- Modal Criar -->
+<div class="modal fade" id="modalCriar" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold">Nova Categoria</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+        ></button>
+      </div>
+      <form method="post" action="/category/criar">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Nome</label>
+            <input
+              type="text"
+              name="name"
+              class="form-control"
+              placeholder="Ex: Alimentação"
+              required
+            />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Descrição</label>
+            <input
+              type="text"
+              name="description"
+              class="form-control"
+              placeholder="Opcional"
+            />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Tipo</label>
+            <select name="type" class="form-select" required>
+              <option value="income">Receita</option>
+              <option value="expense">Despesa</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary">Criar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Editar — action definido via JS ao clicar no nome da categoria -->
 <div class="modal fade" id="modalEdicao" tabindex="-1">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">✏️ Editar Categoria</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <h5 class="modal-title fw-bold">Editar Categoria</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+        ></button>
       </div>
       <form id="form-edicao" method="post">
         <div class="modal-body">
           <div class="mb-3">
             <label class="form-label">Nome</label>
-            <input type="text" name="name" id="edit-name" class="form-control" required />
+            <input
+              type="text"
+              name="name"
+              id="edit-name"
+              class="form-control"
+              required
+            />
           </div>
           <div class="mb-3">
             <label class="form-label">Descrição</label>
-            <input type="text" name="description" id="edit-description" class="form-control" />
+            <input
+              type="text"
+              name="description"
+              id="edit-description"
+              class="form-control"
+            />
           </div>
           <div class="mb-3">
             <label class="form-label">Tipo</label>
             <select name="type" id="edit-type" class="form-select" required>
-              <option value="income">💰 Receita</option>
-              <option value="expense">💸 Despesa</option>
+              <option value="income">Receita</option>
+              <option value="expense">Despesa</option>
             </select>
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Cancelar
+          </button>
           <button type="submit" class="btn btn-primary">Salvar</button>
         </div>
       </form>
@@ -128,18 +271,21 @@
 
 <script>
   function abrirEdicao(el) {
-    document.getElementById('edit-name').value = el.dataset.name;
-    document.getElementById('edit-description').value = el.dataset.description || '';
-    document.getElementById('edit-type').value = el.dataset.type;
-    document.getElementById('form-edicao').action = '/category/editar/' + el.dataset.id;
-    new bootstrap.Modal(document.getElementById('modalEdicao')).show();
+    // popula o modal com os dados do data-* do elemento clicado
+    document.getElementById("edit-name").value = el.dataset.name;
+    document.getElementById("edit-description").value =
+      el.dataset.description || "";
+    document.getElementById("edit-type").value = el.dataset.type;
+    document.getElementById("form-edicao").action =
+      "/category/editar/" + el.dataset.id;
+    new bootstrap.Modal(document.getElementById("modalEdicao")).show();
   }
 
   function confirmarDelete(btn) {
     const id = btn.dataset.id;
     const nome = btn.dataset.nome;
     if (confirm(`Deseja excluir a categoria "${nome}"?`)) {
-      document.getElementById('delete-form-' + id).submit();
+      document.getElementById("delete-form-" + id).submit();
     }
   }
 </script>

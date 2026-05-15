@@ -2,12 +2,12 @@ from pydantic import BaseModel
 from sqlalchemy import Column, Integer, String, DateTime
 from datetime import datetime
 from app.banco_de_dados.database import Base
-class User(BaseModel):
-    id_: int
-    nome: str
-    email: str
-    password_hash : str
-    created_at: str
+"""
+Representa a tabela 'users' no banco de dados.
+Essa classe é responsável SOMENTE pela estrutura da tabela
+usando SQLAlchemy ORM.
+"""
+
 class UserTable(Base):
     __tablename__ = "users"
 

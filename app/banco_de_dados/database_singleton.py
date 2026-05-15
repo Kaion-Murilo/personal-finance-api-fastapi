@@ -1,7 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 from dotenv import load_dotenv
-from app.banco_de_dados.database_singleton import DatabaseSingleton, Base
 import os
 
 # override=False garante que variáveis já injetadas pelo Docker não sejam
@@ -12,24 +11,7 @@ load_dotenv(override=False)
 # para que o create_all encontre todas as tabelas registradas
 Base = declarative_base()
 
-# Instância única do banco
-_db = DatabaseSingleton()
 
-# Expostos para compatibilidade com o restante da aplicação
-engine = _db.engine
-SessionLocal = _db.session_factory
-
-
-def get_db():
-    """
-    Gerador de sessão para uso com Depends() do FastAPI.
-    Abre uma sessão por requisição e fecha ao final, com ou sem erro.
-    """
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 class DatabaseSingleton:
     """
     Gerencia a conexão com o banco de dados usando o padrão Singleton.
@@ -103,4 +85,3 @@ class DatabaseSingleton:
             yield db
         finally:
             db.close()
-    

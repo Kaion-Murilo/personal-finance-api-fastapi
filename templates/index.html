@@ -1,79 +1,135 @@
-{% extends "base.html" %} {% block titulo %}Dashboard{% endblock %} {% block conteudo %}
+{% extends "base.html" %} {% block titulo %}Dashboard{% endblock %} {% block
+conteudo %}
 
-<!-- Cards de resumo -->
-<div class="row mb-4">
+<!-- ===================== PAGE HEADER ===================== -->
+<div class="page-header">
+  <h2>Dashboard</h2>
+  <p>Bem-vindo de volta, {{ current_user.nome }}!</p>
+</div>
+
+<!-- ===================== SUMMARY CARDS ===================== -->
+<div class="row g-3 mb-4">
+  <!-- Receitas -->
   <div class="col-md-3">
-    <div class="card shadow-sm border-0 bg-success text-white">
-      <div class="card-body">
-        <h6 class="card-title">💰 Total Receitas</h6>
-        <h3>R$ {{ "%.2f"|format(resumo.total_receitas) }}</h3>
+    <div class="stat-card card-receita">
+      <div class="label">
+        <i class="bi bi-arrow-down-circle me-1"></i> Total Receitas
       </div>
+      <p class="value">R$ {{ "%.2f"|format(resumo.total_receitas) }}</p>
+      <i class="bi bi-wallet2 icon"></i>
     </div>
   </div>
+
+  <!-- Despesas -->
   <div class="col-md-3">
-    <div class="card shadow-sm border-0 bg-danger text-white">
-      <div class="card-body">
-        <h6 class="card-title">💸 Total Despesas</h6>
-        <h3>R$ {{ "%.2f"|format(resumo.total_despesas) }}</h3>
+    <div class="stat-card card-despesa">
+      <div class="label">
+        <i class="bi bi-arrow-up-circle me-1"></i> Total Despesas
       </div>
+      <p class="value">R$ {{ "%.2f"|format(resumo.total_despesas) }}</p>
+      <i class="bi bi-credit-card icon"></i>
     </div>
   </div>
+
+  <!-- Saldo -->
   <div class="col-md-3">
-    <div class="card shadow-sm border-0 {% if resumo.saldo >= 0 %}bg-primary{% else %}bg-warning{% endif %} text-white">
-      <div class="card-body">
-        <h6 class="card-title">📊 Saldo</h6>
-        <h3>R$ {{ "%.2f"|format(resumo.saldo) }}</h3>
-      </div>
+    <div
+      class="stat-card {% if resumo.saldo >= 0 %}saldo-positivo{% else %}saldo-negativo{% endif %}"
+    >
+      <div class="label"><i class="bi bi-bar-chart me-1"></i> Saldo</div>
+      <p class="value">R$ {{ "%.2f"|format(resumo.saldo) }}</p>
+      <i class="bi bi-graph-up icon"></i>
     </div>
   </div>
+
+  <!-- Total transações -->
   <div class="col-md-3">
-    <div class="card shadow-sm border-0 bg-secondary text-white">
-      <div class="card-body">
-        <h6 class="card-title">🔢 Transações</h6>
-        <h3>{{ resumo.total_transacoes }}</h3>
-      </div>
+    <div class="stat-card card-transacoes">
+      <div class="label"><i class="bi bi-list-ul me-1"></i> Transações</div>
+      <p class="value">{{ resumo.total_transacoes }}</p>
+      <i class="bi bi-receipt icon"></i>
     </div>
   </div>
 </div>
 
-<!-- Últimas transações -->
-<div class="card shadow-sm">
-  <div class="card-body">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <h5 class="mb-0">🕐 Últimas Transações</h5>
-      <a href="/transaction" class="btn btn-sm btn-outline-primary">Ver todas</a>
+<!-- ===================== MONTHLY CHART ===================== -->
+<div class="card mb-4">
+  <div class="card-body p-4">
+    <div class="chart-header">
+      <h5>Saldo Mensal</h5>
+      <p>Receitas vs Despesas em {{ ano_atual }}</p>
     </div>
-    <table class="table table-striped">
+
+    <canvas id="graficoMensal" height="100"></canvas>
+
+    <!-- Dados vindos do backend -->
+    <script id="dados-mensal" type="application/json">
+      {{ mensal | tojson }}
+    </script>
+  </div>
+</div>
+
+<!-- ===================== LAST TRANSACTIONS ===================== -->
+<div class="card">
+  <div class="card-body p-0">
+    <div class="table-header">
+      <div>
+        <h5>Últimas Transações</h5>
+        <p>Suas movimentações mais recentes</p>
+      </div>
+      <a href="/transaction" class="btn btn-outline-primary btn-sm"
+        >Ver todas</a
+      >
+    </div>
+
+    <table class="table mb-0">
       <thead>
         <tr>
           <th>Título</th>
-          <th>Valor</th>
-          <th>Data</th>
           <th>Categoria</th>
+          <th>Data</th>
+          <th class="text-end">Valor</th>
         </tr>
       </thead>
+
       <tbody>
         {% for t in ultimas %}
         <tr>
-          <td>{{ t.title }}</td>
-          <td>R$ {{ "%.2f"|format(t.amount|float) }}</td>
-          <td>{{ t.date }}</td>
+          <td class="fw-500">{{ t.title }}</td>
+
           <td>
-            {% if t.category.type == "income" %}
-              <span class="badge bg-success">💰 {{ t.category.name }}</span>
-            {% else %}
-              <span class="badge bg-danger">💸 {{ t.category.name }}</span>
-            {% endif %}
+            <span
+              class="badge {% if t.category.type == 'income' %}badge-income{% else %}badge-expense{% endif %}"
+            >
+              {{ t.category.name }}
+            </span>
+          </td>
+
+          <td class="text-muted">{{ t.date.strftime('%d/%m/%Y') }}</td>
+
+          <td
+            class="text-end fw-bold {% if t.category.type == 'income' %}text-success{% else %}text-danger{% endif %}"
+          >
+            {% if t.category.type == "income" %}+{% else %}-{% endif %} R$ {{
+            "%.2f"|format(t.amount|float) }}
           </td>
         </tr>
+
         {% else %}
         <tr>
-          <td colspan="4" class="text-center">Nenhuma transação ainda.</td>
+          <td colspan="4" class="empty-state">
+            <i class="bi bi-inbox"></i>
+            Nenhuma transação ainda.
+          </td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
 </div>
+
+<!-- ===================== CHART JS ===================== -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="/static/js/dashboard-chart.js"></script>
 
 {% endblock %}
